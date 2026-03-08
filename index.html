@@ -516,7 +516,7 @@
         </span>
         <span class="trust-item">
           <svg width="16" height="16" fill="var(--green)" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/></svg>
-          Next-day payouts
+          Payouts within 3 hours
         </span>
       </div>
     </div>
@@ -570,7 +570,7 @@
         <div class="step">
           <div class="step-num">3</div>
           <h3>Start Getting Paid</h3>
-          <p>Accept card, contactless, and mobile payments. Money hits your bank the next business day.</p>
+          <p>Accept card, contactless, and mobile payments. Money hits your bank within 3 hours — every day.</p>
         </div>
       </div>
     </div>
@@ -633,7 +633,12 @@
       <h2 class="section-title">Ready to Go Cashless?</h2>
       <p class="section-subtitle">Leave your details and I'll personally walk you through everything — no pressure, no hard sell.</p>
 
-      <form class="cta-form" id="leadForm">
+      <form class="cta-form" id="leadForm" action="https://api.web3forms.com/submit" method="POST">
+        <input type="hidden" name="access_key" value="17f00a39-ac82-441f-9a98-8cbd7033ebcd">
+        <input type="hidden" name="subject" value="New Lead from GoCashless Funnel">
+        <input type="hidden" name="from_name" value="GoCashless Funnel">
+        <!-- Honeypot spam protection -->
+        <input type="checkbox" name="botcheck" style="display:none;">
         <input type="text" name="name" placeholder="Your name" required>
         <input type="email" name="email" placeholder="Email address" required>
         <input type="tel" name="phone" placeholder="Phone number (optional)">
@@ -678,7 +683,7 @@
         </div>
         <div class="faq-item">
           <button class="faq-question">How quickly will I receive payments? <span class="arrow">▼</span></button>
-          <div class="faq-answer"><p>Payments are typically deposited into your bank account the next business day. Fast and reliable.</p></div>
+          <div class="faq-answer"><p>Payments are typically deposited into your bank account within 3 hours. Fast and reliable, every single day.</p></div>
         </div>
         <div class="faq-item">
           <button class="faq-question">Do I need a special bank account? <span class="arrow">▼</span></button>
@@ -715,11 +720,39 @@
       });
     });
 
-    // Form submission
+    // Form submission via Web3Forms
     document.getElementById('leadForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      this.style.display = 'none';
-      document.getElementById('successMsg').classList.add('show');
+      const form = this;
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const originalHTML = submitBtn.innerHTML;
+      
+      // Show loading state
+      submitBtn.innerHTML = 'Sending...';
+      submitBtn.disabled = true;
+
+      const formData = new FormData(form);
+
+      fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          form.style.display = 'none';
+          document.getElementById('successMsg').classList.add('show');
+        } else {
+          submitBtn.innerHTML = originalHTML;
+          submitBtn.disabled = false;
+          alert('Something went wrong. Please try again.');
+        }
+      })
+      .catch(error => {
+        submitBtn.innerHTML = originalHTML;
+        submitBtn.disabled = false;
+        alert('Connection error. Please check your internet and try again.');
+      });
     });
 
     // Smooth scroll
